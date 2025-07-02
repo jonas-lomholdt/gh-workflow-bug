@@ -52,7 +52,7 @@ jobs:
 
   # QA environment matrix job
   qa-matrix:
-    needs: dev-matrix
+    needs: [setup, dev-matrix]
     runs-on: ubuntu-latest
     environment: deploy-qa
     strategy:
@@ -73,7 +73,7 @@ jobs:
 
   # Preprod environment matrix job
   preprod-matrix:
-    needs: qa-matrix
+    needs: [setup, qa-matrix]
     runs-on: ubuntu-latest
     environment: deploy-preprod
     strategy:
@@ -94,7 +94,7 @@ jobs:
 
   # Prod environment matrix job
   prod-matrix:
-    needs: preprod-matrix
+    needs: [setup, preprod-matrix]
     runs-on: ubuntu-latest
     environment: deploy-prod
     strategy:
@@ -115,7 +115,7 @@ jobs:
 
   # SIT environment matrix job
   sit-matrix:
-    needs: preprod-matrix
+    needs: [setup, preprod-matrix]
     runs-on: ubuntu-latest
     environment: deploy-sit
     strategy:
@@ -136,7 +136,7 @@ jobs:
 
   # SIT-2 environment matrix job
   sit-2-matrix:
-    needs: preprod-matrix
+    needs: [setup, preprod-matrix]
     runs-on: ubuntu-latest
     environment: deploy-sit-2
     strategy:
