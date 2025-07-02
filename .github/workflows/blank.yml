@@ -1,6 +1,6 @@
-# This is a basic workflow to help you get started with Actions
+# GitHub Workflow Matrix Test - Testing Limitations with Multiple Environments
 
-name: CI
+name: Matrix Test Workflow
 
 # Controls when the workflow will run
 on:
@@ -15,22 +15,153 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  # Load matrix items from file
+  setup:
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    outputs:
+      matrix-items: ${{ steps.load-matrix.outputs.matrix-items }}
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: Load matrix items
+        id: load-matrix
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          echo "matrix-items=$(cat matrix-items.json | jq -c .)" >> $GITHUB_OUTPUT
+
+  # Dev environment matrix job
+  dev-matrix:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        item: ${{ fromJson(needs.setup.outputs.matrix-items) }}
+      max-parallel: 10
+      fail-fast: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Process item in DEV environment
+        run: |
+          echo "Processing ${{ matrix.item }} in DEV environment"
+          echo "Starting at $(date)"
+          sleep 60
+          echo "Completed at $(date)"
+
+  # QA environment matrix job
+  qa-matrix:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        item: ${{ fromJson(needs.setup.outputs.matrix-items) }}
+      max-parallel: 10
+      fail-fast: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Process item in QA environment
+        run: |
+          echo "Processing ${{ matrix.item }} in QA environment"
+          echo "Starting at $(date)"
+          sleep 60
+          echo "Completed at $(date)"
+
+  # Preprod environment matrix job
+  preprod-matrix:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        item: ${{ fromJson(needs.setup.outputs.matrix-items) }}
+      max-parallel: 10
+      fail-fast: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Process item in PREPROD environment
+        run: |
+          echo "Processing ${{ matrix.item }} in PREPROD environment"
+          echo "Starting at $(date)"
+          sleep 60
+          echo "Completed at $(date)"
+
+  # Prod environment matrix job
+  prod-matrix:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        item: ${{ fromJson(needs.setup.outputs.matrix-items) }}
+      max-parallel: 10
+      fail-fast: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Process item in PROD environment
+        run: |
+          echo "Processing ${{ matrix.item }} in PROD environment"
+          echo "Starting at $(date)"
+          sleep 60
+          echo "Completed at $(date)"
+
+  # SIT environment matrix job
+  sit-matrix:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        item: ${{ fromJson(needs.setup.outputs.matrix-items) }}
+      max-parallel: 10
+      fail-fast: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Process item in SIT environment
+        run: |
+          echo "Processing ${{ matrix.item }} in SIT environment"
+          echo "Starting at $(date)"
+          sleep 60
+          echo "Completed at $(date)"
+
+  # SIT-2 environment matrix job
+  sit-2-matrix:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        item: ${{ fromJson(needs.setup.outputs.matrix-items) }}
+      max-parallel: 10
+      fail-fast: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Process item in SIT-2 environment
+        run: |
+          echo "Processing ${{ matrix.item }} in SIT-2 environment"
+          echo "Starting at $(date)"
+          sleep 60
+          echo "Completed at $(date)"
+
+  # Summary job that runs after all matrix jobs complete
+  summary:
+    needs: [dev-matrix, qa-matrix, preprod-matrix, prod-matrix, sit-matrix, sit-2-matrix]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Workflow Summary
+        run: |
+          echo "Matrix workflow completed for all environments"
+          echo "Total matrix jobs: 6 environments × 46 items = 276 jobs"
+          echo "Dev jobs: ${{ needs.dev-matrix.result }}"
+          echo "QA jobs: ${{ needs.qa-matrix.result }}"
+          echo "Preprod jobs: ${{ needs.preprod-matrix.result }}"
+          echo "Prod jobs: ${{ needs.prod-matrix.result }}"
+          echo "SIT jobs: ${{ needs.sit-matrix.result }}"
+          echo "SIT-2 jobs: ${{ needs.sit-2-matrix.result }}"
