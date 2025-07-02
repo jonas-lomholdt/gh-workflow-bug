@@ -33,6 +33,7 @@ jobs:
   dev-matrix:
     needs: setup
     runs-on: ubuntu-latest
+    environment: deploy-dev
     strategy:
       matrix:
         item: ${{ fromJson(needs.setup.outputs.matrix-items) }}
@@ -51,8 +52,9 @@ jobs:
 
   # QA environment matrix job
   qa-matrix:
-    needs: setup
+    needs: dev-matrix
     runs-on: ubuntu-latest
+    environment: deploy-qa
     strategy:
       matrix:
         item: ${{ fromJson(needs.setup.outputs.matrix-items) }}
@@ -71,8 +73,9 @@ jobs:
 
   # Preprod environment matrix job
   preprod-matrix:
-    needs: setup
+    needs: qa-matrix
     runs-on: ubuntu-latest
+    environment: deploy-preprod
     strategy:
       matrix:
         item: ${{ fromJson(needs.setup.outputs.matrix-items) }}
@@ -91,8 +94,9 @@ jobs:
 
   # Prod environment matrix job
   prod-matrix:
-    needs: setup
+    needs: preprod-matrix
     runs-on: ubuntu-latest
+    environment: deploy-prod
     strategy:
       matrix:
         item: ${{ fromJson(needs.setup.outputs.matrix-items) }}
@@ -111,8 +115,9 @@ jobs:
 
   # SIT environment matrix job
   sit-matrix:
-    needs: setup
+    needs: preprod-matrix
     runs-on: ubuntu-latest
+    environment: deploy-sit
     strategy:
       matrix:
         item: ${{ fromJson(needs.setup.outputs.matrix-items) }}
@@ -131,8 +136,9 @@ jobs:
 
   # SIT-2 environment matrix job
   sit-2-matrix:
-    needs: setup
+    needs: preprod-matrix
     runs-on: ubuntu-latest
+    environment: deploy-sit-2
     strategy:
       matrix:
         item: ${{ fromJson(needs.setup.outputs.matrix-items) }}
